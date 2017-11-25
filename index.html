@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+		<style type="text/css">
+			html, body{
+				overflow: hidden;
+				width: 100%;
+				height: 100%;
+				margin: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canv"></canvas>
+		<script type="text/javascript">
+			var canv = document.querySelector("#canv");
+
+			canv.width = document.body.clientWidth;
+			canv.height = document.body.clientHeight;
+
+			var canvW = canv.width;
+			var canvH = canv.height;
+
+			var dist = 40;
+			var offset = 20;
+			var maxR = 18; // max radius
+			var minR = 1; // min radius
+			var trigDist = 50;
+
+			var xCount = Math.ceil(canvW / dist);
+			var yCount = Math.ceil(canvH / dist);
+
+			var grid = [];
+
+			var ctx = canv.getContext("2d");
+
+			var mx = 0;
+			var my = 0;
+
+			var cx = -990;
+			var cy = -990;
+
+			init();
+
+			function init(){
+				for (var i = 0; i < yCount; i++) {
+					grid[i] = [];
+					for (var j = 0; j < xCount; j++) {
+						var dot = {
+							x: j * dist + offset,
+							y: i * dist + offset,
+							r: minR,
+						}
+						grid[i][j] = dot;
+					}
+				}
+				draw();
+			}
+
+			function draw(){
+				ctx.clearRect(0, 0, canvW, canvH);
+
+				for (var i = 0; i < yCount; i++){
+					for (var j = 0; j < xCount; j++){
+						
+						var dot = grid[i][j];
+
+						ctx.beginPath();
+						ctx.fillStyle = 'coral';
+						ctx.arc(dot.x, dot.y, dot.r, 0, 2*Math.PI);
+						ctx.fill();
+					}
+				}
+			}
+
+			function distance(x1, y1, x2, y2){
+				var a = x1 - x2
+				var b = y1 - y2
+
+				return Math.sqrt(a*a + b*b);
+			};
+
+			requestAnimationFrame(function logic(){
+				mx += (cx - mx) / 25;
+				my += (cy - my) / 25;
+
+				for (var i = 0; i < yCount; i++){
+					for (var j = 0; j < xCount; j++){
+						
+						var dot = grid[i][j];
+						var dist = distance(mx, my, dot.x, dot.y);
+
+						if(dist <= trigDist){
+							var p = 1 - dist / trigDist;
+							var r = minR + p * maxR;
+
+							grid[i][j].r = r;
+						}else{
+							grid[i][j].r = minR;
+						}
+						
+					}
+				};
+
+				draw();
+
+				requestAnimationFrame(logic);
+			});
+
+			canv.onmousemove = function(e){
+				cx = e.clientX;
+				cy = e.clientY;
+			}
+		</script>
+	</body>
+</html>
